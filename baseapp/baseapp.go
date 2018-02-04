@@ -19,7 +19,7 @@ import (
 
 var mainHeaderKey = []byte("header")
 
-// BaseApp - The ABCI application
+// The ABCI application
 type BaseApp struct {
 	logger log.Logger
 
@@ -59,7 +59,7 @@ type BaseApp struct {
 
 var _ abci.Application = &BaseApp{}
 
-// NewBaseApp - create and name new BaseApp
+// Create and name new BaseApp
 func NewBaseApp(name string) *BaseApp {
 	var baseapp = &BaseApp{
 		logger: makeDefaultLogger(),
@@ -89,12 +89,12 @@ func (app *BaseApp) initMultiStore() {
 	app.cms = cms
 }
 
-// Name - BaseApp Name
+// BaseApp Name
 func (app *BaseApp) Name() string {
 	return app.name
 }
 
-// MountStore - Mount a store to the provided key in the BaseApp multistore
+// Mount a store to the provided key in the BaseApp multistore
 func (app *BaseApp) MountStore(key sdk.StoreKey, typ sdk.StoreType) {
 	app.cms.MountStoreWithDB(key, typ, app.db)
 }
@@ -118,24 +118,24 @@ func (app *BaseApp) SetBeginBlocker(...) {}
 func (app *BaseApp) SetEndBlocker(...) {}
 */
 
-// LoadLatestVersion - TODO add description
+// TODO add description
 func (app *BaseApp) LoadLatestVersion(mainKey sdk.StoreKey) error {
 	app.cms.LoadLatestVersion()
 	return app.initFromStore(mainKey)
 }
 
-// LoadVersion - load application version
+// Load application version
 func (app *BaseApp) LoadVersion(version int64, mainKey sdk.StoreKey) error {
 	app.cms.LoadVersion(version)
 	return app.initFromStore(mainKey)
 }
 
-// LastCommitID -  The last CommitID of the multistore.
+// The last CommitID of the multistore.
 func (app *BaseApp) LastCommitID() sdk.CommitID {
 	return app.cms.LastCommitID()
 }
 
-// LastBlockHeight -  The last commited block height.
+// The last commited block height.
 func (app *BaseApp) LastBlockHeight() int64 {
 	return app.cms.LastCommitID().Version
 }
@@ -180,7 +180,7 @@ func (app *BaseApp) initFromStore(mainKey sdk.StoreKey) error {
 
 //----------------------------------------
 
-// Info - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 
 	lastCommitID := app.cms.LastCommitID()
@@ -192,25 +192,25 @@ func (app *BaseApp) Info(req abci.RequestInfo) abci.ResponseInfo {
 	}
 }
 
-// SetOption - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) SetOption(req abci.RequestSetOption) (res abci.ResponseSetOption) {
 	// TODO: Implement
 	return
 }
 
-// InitChain - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) InitChain(req abci.RequestInitChain) (res abci.ResponseInitChain) {
 	// TODO: Use req.Validators
 	return
 }
 
-// Query - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) Query(req abci.RequestQuery) (res abci.ResponseQuery) {
 	// TODO: See app/query.go
 	return
 }
 
-// BeginBlock - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeginBlock) {
 	// NOTE: For consistency we should unset these upon EndBlock.
 	app.header = &req.Header
@@ -220,7 +220,7 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 	return
 }
 
-// CheckTx - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 
 	// Decode the Tx.
@@ -246,7 +246,7 @@ func (app *BaseApp) CheckTx(txBytes []byte) (res abci.ResponseCheckTx) {
 
 }
 
-// DeliverTx - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) DeliverTx(txBytes []byte) (res abci.ResponseDeliverTx) {
 
 	// Decode the Tx.
@@ -334,7 +334,7 @@ func (app *BaseApp) runTx(isCheckTx bool, txBytes []byte, tx sdk.Tx) (result sdk
 	return result
 }
 
-// EndBlock - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) EndBlock(req abci.RequestEndBlock) (res abci.ResponseEndBlock) {
 	res.ValidatorUpdates = app.valUpdates
 	app.valUpdates = nil
@@ -344,7 +344,7 @@ func (app *BaseApp) EndBlock(req abci.RequestEndBlock) (res abci.ResponseEndBloc
 	return
 }
 
-// Commit - Implements ABCI
+// Implements ABCI
 func (app *BaseApp) Commit() (res abci.ResponseCommit) {
 	app.msDeliver.Write()
 	commitID := app.cms.Commit()
