@@ -51,7 +51,6 @@ func SendTxCmd(cdc *codec.Codec) *cobra.Command {
 			if err != nil {
 				return err
 			}
-
 			// ensure account has enough coins
 			if !account.GetCoins().IsAllGTE(coins) {
 				return fmt.Errorf("address %s doesn't have enough coins to pay for this transaction", from)

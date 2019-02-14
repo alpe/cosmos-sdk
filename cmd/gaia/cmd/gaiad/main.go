@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/cosmos/cosmos-sdk/x/censorship"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -57,25 +59,21 @@ func main() {
 	}
 }
 
-func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
-	return app.NewGaiaApp(
-		logger, db, traceStore, true,
-		baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))),
-		baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)),
-	)
+func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer, blacklist censorship.Blacklist) abci.Application {
+	return app.NewGaiaApp(logger, db, traceStore, true, blacklist, baseapp.SetPruning(store.NewPruningOptionsFromString(viper.GetString("pruning"))), baseapp.SetMinGasPrices(viper.GetString(server.FlagMinGasPrices)))
 }
 
 func exportAppStateAndTMValidators(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,
 ) (json.RawMessage, []tmtypes.GenesisValidator, error) {
 	if height != -1 {
-		gApp := app.NewGaiaApp(logger, db, traceStore, false)
+		gApp := app.NewGaiaApp(logger, db, traceStore, false, censorship.NoopBlacklist{})
 		err := gApp.LoadHeight(height)
 		if err != nil {
 			return nil, nil, err
 		}
 		return gApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 	}
-	gApp := app.NewGaiaApp(logger, db, traceStore, true)
+	gApp := app.NewGaiaApp(logger, db, traceStore, true, censorship.NoopBlacklist{})
 	return gApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }

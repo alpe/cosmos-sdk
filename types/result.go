@@ -85,11 +85,20 @@ func NewResponseFormatBroadcastTxCommit(res *ctypes.ResultBroadcastTxCommit) TxR
 }
 
 func NewResponseFormatBroadcastTx(res *ctypes.ResultBroadcastTx) TxResponse {
+	var data []byte
+	if res.Data != nil {
+		data = res.Data.Bytes()
+	}
+	hash := ""
+	if res.Hash != nil {
+		hash = res.Hash.String()
+	}
+	hash = res.Hash.String()
 	return TxResponse{
 		Code:   res.Code,
-		Data:   res.Data.Bytes(),
+		Data:   data,
 		Log:    res.Log,
-		TxHash: res.Hash.String(),
+		TxHash: hash,
 	}
 }
 

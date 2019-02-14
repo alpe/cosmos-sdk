@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/x/censorship"
+
 	"github.com/cosmos/cosmos-sdk/store"
 
 	cpm "github.com/otiai10/copy"
@@ -106,10 +108,7 @@ func run(rootDir string) {
 
 	// Application
 	fmt.Println("Creating application")
-	myapp := app.NewGaiaApp(
-		ctx.Logger, appDB, traceStoreWriter, true,
-		baseapp.SetPruning(store.PruneEverything), // nothing
-	)
+	myapp := app.NewGaiaApp(ctx.Logger, appDB, traceStoreWriter, true, censorship.NoopBlacklist{}, baseapp.SetPruning(store.PruneEverything))
 
 	// Genesis
 	var genDocPath = filepath.Join(configDir, "genesis.json")

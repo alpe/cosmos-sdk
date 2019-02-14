@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/cosmos/cosmos-sdk/x/censorship"
+
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -208,7 +210,7 @@ func InitializeTestLCD(t *testing.T, nValidators int, initAddrs []sdk.AccAddress
 	privVal.Reset()
 
 	db := dbm.NewMemDB()
-	app := gapp.NewGaiaApp(logger, db, nil, true)
+	app := gapp.NewGaiaApp(logger, db, nil, true, censorship.NoopBlacklist{})
 	cdc = gapp.MakeCodec()
 
 	genesisFile := config.GenesisFile()
@@ -358,6 +360,7 @@ func startTM(
 		dbProvider,
 		nm.DefaultMetricsProvider(tmcfg.Instrumentation),
 		logger.With("module", "node"),
+		censorship.NoopBlacklist{},
 	)
 	if err != nil {
 		return nil, err

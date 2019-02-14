@@ -2,6 +2,10 @@ package server
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/cosmos/cosmos-sdk/x/censorship"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -73,7 +77,7 @@ func startStandAlone(ctx *Context, appCreator AppCreator) error {
 		return err
 	}
 
-	app := appCreator(ctx.Logger, db, traceWriter)
+	app := appCreator(ctx.Logger, db, traceWriter, censorship.NoopBlacklist{})
 
 	svr, err := server.NewServer(addr, "socket", app)
 	if err != nil {
@@ -112,7 +116,18 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 		return nil, err
 	}
 
-	app := appCreator(ctx.Logger, db, traceWriter)
+	logger := ctx.Logger.With("module", "censorship")
+	stateSnapshots := make(chan censorship.StateSnapshot, 1)
+	blacklist := censorship.NewStateExportBlacklistStore(censorship.NewBlacklistStore(logger), stateSnapshots)
+	blStateServer := censorship.NewHttpHandler(stateSnapshots, logger)
+	go func() {
+		if err := http.ListenAndServe(":8080", blStateServer); err != nil {
+			logger.Error("state export server failed", "cause", err)
+			os.Exit(1)
+		}
+	}()
+
+	app := appCreator(ctx.Logger, db, traceWriter, blacklist)
 
 	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
 	if err != nil {
@@ -134,7 +149,6 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = tmNode.Start()
 	if err != nil {
 		return nil, err
