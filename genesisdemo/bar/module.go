@@ -19,7 +19,7 @@ func NewModule() *Module {
 	return &Module{}
 }
 
-func (a *Module) FromGenesis(ctx sdk.Context, opts genesisdemo.Options, params genesisdemo.GenesisParams) error {
+func (a *Module) FromGenesis1(ctx sdk.Context, opts genesisdemo.Options, params genesisdemo.GenesisParams) error {
 	var data GenesisState
 	unmarshaler := jsonpb.Unmarshaler{}
 	raw, ok := opts[Name]
@@ -31,5 +31,15 @@ func (a *Module) FromGenesis(ctx sdk.Context, opts genesisdemo.Options, params g
 	}
 	// persist
 	a.State = data.Any
+	return nil
+}
+
+type GenesisSource interface {
+	GetBar() GenesisState
+}
+
+func (a *Module) FromGenesis2(ctx sdk.Context, data GenesisSource, params genesisdemo.GenesisParams) error {
+	// persist
+	a.State = data.GetBar().Any
 	return nil
 }

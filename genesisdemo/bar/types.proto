@@ -1,9 +1,7 @@
 syntax = "proto3";
 package bar;
-
-import "third_party/proto/gogoproto/gogo.proto";
+option go_package = "github.com/cosmos/cosmos-sdk/genesisdemo/bar";
 
 message GenesisState {
-    option (gogoproto.equal) = true;
     string any = 1;
 }

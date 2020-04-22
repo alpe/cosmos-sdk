@@ -86,5 +86,5 @@ func FromInitChain(req abci.RequestInitChain) GenesisParams {
 // Initializer implementations are used to initialize
 // extensions from genesis file contents
 type Initializer interface {
-	FromGenesis(ctx sdk.Context, opts Options, params GenesisParams) error
+	FromGenesis1(ctx sdk.Context, opts Options, params GenesisParams) error
 }
